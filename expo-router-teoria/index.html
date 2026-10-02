@@ -1,0 +1,1510 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Línea Expo Router</title>
+    <meta
+      name="description"
+      content="Clase sobre Expo Router, pilas y colas. Taller Complementario React Native II — Instituto Politécnico Formosa." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;700;800&family=Big+Shoulders+Display:wght@700;800;900&display=swap" />
+    <link rel="stylesheet" href="css/estilos.css" />
+  </head>
+  <body>
+    <main class="deck" id="deck">
+      <!-- =====================================================================
+           LÍNEA C · CONTEXTO
+           ===================================================================== -->
+
+      <!-- 1 · Portada -->
+      <section class="slide portada" data-seccion="contexto" data-titulo="Portada" data-sin-cartel>
+        <div class="lamina">
+          <div class="portada-texto">
+            <span class="etiqueta">Taller Complementario · React Native II</span>
+            <h1>Expo <span>Router</span></h1>
+            <p class="bajada">
+              Navegación basada en archivos, pilas, colas y todo lo que pasa entre que tocás un
+              botón y aparece la pantalla siguiente.
+            </p>
+            <div class="portada-meta">
+              <strong>Tecnicatura Superior en Desarrollo de Software Multiplataforma</strong>
+              <span>Instituto Politécnico Formosa · Expo SDK 57</span>
+            </div>
+          </div>
+
+          <svg class="mapa-portada" viewBox="0 0 600 380" role="img" aria-label="Mapa de rutas de la app de ejemplo, dibujado como un mapa de subte">
+            <path class="trazo" pathLength="1" style="stroke: var(--l-fundamentos)" d="M90 190 H230 L310 110 H500" />
+            <path class="trazo" pathLength="1" style="stroke: var(--l-estructuras)" d="M90 190 V80 Q90 50 120 50 H300" />
+            <path class="trazo" pathLength="1" style="stroke: var(--l-navegadores)" d="M90 190 L160 260 H340" />
+            <path class="trazo" pathLength="1" style="stroke: var(--l-dinamicas)" d="M90 190 V300 Q90 330 120 330 H430" />
+            <path class="protegida" style="stroke: var(--l-acceso)" d="M340 260 L390 210 H540" />
+
+            <circle class="parada-mapa" style="--d: 0; stroke-width: 6" cx="90" cy="190" r="17" />
+            <circle class="parada-mapa" style="--d: 1" cx="230" cy="190" r="10" />
+            <circle class="parada-mapa" style="--d: 2" cx="500" cy="110" r="10" />
+            <circle class="parada-mapa" style="--d: 3" cx="300" cy="50" r="10" />
+            <circle class="parada-mapa" style="--d: 4" cx="340" cy="260" r="10" />
+            <circle class="parada-mapa" style="--d: 5" cx="430" cy="330" r="10" />
+            <circle class="parada-mapa" style="--d: 6" cx="540" cy="210" r="10" />
+
+            <text style="--d: 0" x="44" y="160">/</text>
+            <text style="--d: 1" x="186" y="222">/productos</text>
+            <text style="--d: 2" x="410" y="90">/productos/[id]</text>
+            <text style="--d: 3" x="222" y="30">/pila/[nivel]</text>
+            <text style="--d: 4" x="290" y="292">/perfil</text>
+            <text style="--d: 5" x="300" y="362">/docs/[...slug]</text>
+            <text style="--d: 6" x="470" y="244">/privado</text>
+          </svg>
+        </div>
+        <aside class="notas">
+          <p>Presentarse y contar el objetivo: al final de la clase deberían poder crear una app con varias pantallas, pasar datos entre ellas y proteger rutas.</p>
+          <p>Controles: flechas o espacio para avanzar, <kbd>M</kbd> mapa completo, <kbd>N</kbd> estas notas, <kbd>T</kbd> tema, <kbd>F</kbd> pantalla completa.</p>
+        </aside>
+      </section>
+
+      <!-- 2 · Agenda -->
+      <section class="slide" data-seccion="contexto" data-titulo="Recorrido de la clase">
+        <div class="lamina">
+          <h2 class="titulo">El recorrido de hoy</h2>
+          <p class="bajada">
+            La clase está armada como un mapa de subte: cada bloque es una línea de color y cada
+            diapositiva es una estación. Tocá una línea para saltar ahí.
+          </p>
+          <ol class="agenda" id="agenda"></ol>
+        </div>
+        <aside class="notas">
+          <p>Duración sugerida: 2 módulos de 80 min. Primer módulo hasta "Navegadores"; segundo módulo desde "Rutas dinámicas" + taller.</p>
+        </aside>
+      </section>
+
+      <!-- 3 · Qué es navegar -->
+      <section class="slide" data-seccion="contexto" data-titulo="¿Qué es navegar?">
+        <div class="lamina">
+          <h2 class="titulo">¿Qué significa “navegar” en una app?</h2>
+          <div class="dos">
+            <div class="pila-v">
+              <h3 class="subtitulo">En la web</h3>
+              <div class="maqueta-web" aria-hidden="true">
+                <div class="barra-url">‹ › <span>tienda.com/productos/3</span></div>
+                <div class="cuerpo">
+                  <strong>Chipá (docena)</strong>
+                  <div class="linea-gris" style="width: 80%"></div>
+                  <div class="linea-gris" style="width: 55%"></div>
+                </div>
+              </div>
+              <ul class="estaciones">
+                <li>Cada página tiene una <strong>URL</strong> visible.</li>
+                <li>El navegador guarda un <strong>historial</strong>: atrás y adelante.</li>
+                <li>Un link lleva a otra URL.</li>
+              </ul>
+            </div>
+            <div class="pila-v">
+              <h3 class="subtitulo">En el celular</h3>
+              <div class="dos centro">
+                <div class="telefono" aria-hidden="true">
+                  <div class="telefono-pantalla">
+                    <div class="tarjetas-apiladas">
+                      <div>/</div>
+                      <div>/productos</div>
+                      <div>/productos/3</div>
+                    </div>
+                  </div>
+                </div>
+                <ul class="estaciones">
+                  <li>No hay barra de direcciones.</li>
+                  <li>Las pantallas <strong>se apilan</strong> una encima de otra.</li>
+                  <li>Se vuelve con un gesto o el botón atrás de Android.</li>
+                  <li>Tabs y menús laterales cambian de sección.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="aviso tip">
+            <span class="etiqueta">La idea clave</span>
+            Expo Router une los dos mundos: cada pantalla del celular también tiene una URL.
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Preguntar: ¿qué pasa cuando tocan "atrás" en WhatsApp dentro de un chat? ¿Y en Instagram al cambiar de pestaña? Dejar que noten la diferencia entre apilar y cambiar de sección.</p>
+        </aside>
+      </section>
+
+      <!-- 4 · Qué es Expo Router -->
+      <section class="slide" data-seccion="contexto" data-titulo="¿Qué es Expo Router?">
+        <div class="lamina">
+          <h2 class="titulo">¿Qué es Expo Router?</h2>
+          <p class="bajada">
+            Es el sistema de navegación de Expo. <strong>Las carpetas y archivos de
+            <span class="ruta">src/app</span> se convierten en las pantallas y rutas</strong> de
+            tu app. Por dentro usa React Navigation, que en SDK 57 ya viene incluido en el
+            paquete.
+          </p>
+          <div class="cuatro">
+            <div class="rasgo">
+              <h3>Rutas por archivos</h3>
+              <p>Creás <span class="ruta">perfil.tsx</span> y ya existe la pantalla <span class="ruta">/perfil</span>. No hay que registrar nada.</p>
+            </div>
+            <div class="rasgo">
+              <h3>Deep links automáticos</h3>
+              <p>Cualquier pantalla se puede abrir desde un link externo, una notificación o un QR.</p>
+            </div>
+            <div class="rasgo">
+              <h3>Android, iOS y web</h3>
+              <p>El mismo código navega en las tres plataformas; en web las URLs son reales.</p>
+            </div>
+            <div class="rasgo">
+              <h3>Rutas tipadas</h3>
+              <p>TypeScript avisa si escribís mal una ruta, antes de ejecutar la app.</p>
+            </div>
+          </div>
+          <div class="tabla-scroll">
+            <table>
+              <thead>
+                <tr><th>Paquete (SDK 57)</th><th>expo</th><th>expo-router</th><th>react-native</th><th>react</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Versión</td><td><code>~57.0.21</code></td><td><code>~57.0.20</code></td><td><code>0.86.3</code></td><td><code>19.2.3</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Remarcar que en SDK 57 los paquetes de Expo usan el mismo número de versión que el SDK: expo-router 57 va con SDK 57.</p>
+          <p>Nunca instalar versiones a mano: usar <code>npx expo install</code> para que coincidan con Expo Go.</p>
+        </aside>
+      </section>
+
+      <!-- 5 · Antes y después -->
+      <section class="slide" data-seccion="contexto" data-titulo="Antes y después">
+        <div class="lamina">
+          <h2 class="titulo">Antes: configurar. Ahora: crear archivos.</h2>
+          <div class="dos">
+            <div class="pila-v">
+              <span class="etiqueta">React Navigation “a mano”</span>
+              <script type="text/plain" data-codigo="tsx" data-archivo="App.tsx">
+                const Stack = createNativeStackNavigator();
+
+                const linking = {
+                  prefixes: ['miapp://'],
+                  config: { screens: { Home: '', Producto: 'productos/:id' } },
+                };
+
+                export default function App() {
+                  return (
+                    <NavigationContainer linking={linking}>
+                      <Stack.Navigator>
+                        <Stack.Screen name="Home" component={HomeScreen} />
+                        <Stack.Screen name="Producto" component={ProductoScreen} />
+                      </Stack.Navigator>
+                    </NavigationContainer>
+                  );
+                }
+              </script>
+            </div>
+            <div class="pila-v">
+              <span class="etiqueta">Expo Router</span>
+              <script type="text/plain" data-codigo="arbol" data-archivo="estructura del proyecto">
+                src/app/
+                ├── _layout.tsx         → <Stack />
+                ├── index.tsx           → /
+                └── productos/
+                    └── [id].tsx        → /productos/:id
+              </script>
+              <script type="text/plain" data-codigo="tsx" data-archivo="src/app/_layout.tsx">
+                import { Stack } from 'expo-router';
+
+                export default function Layout() {
+                  return <Stack />;
+                }
+              </script>
+              <div class="aviso tip">
+                <span class="etiqueta">Resultado</span>
+                Las mismas dos pantallas, con deep links incluidos, sin tabla de configuración.
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>No hace falta que entiendan todo el código de la izquierda: la idea es mostrar cuánto se simplifica. Expo Router genera esa configuración leyendo las carpetas.</p>
+        </aside>
+      </section>
+
+      <!-- =====================================================================
+           LÍNEA P · PILAS Y COLAS
+           ===================================================================== -->
+
+      <!-- 6 · Pila -->
+      <section class="slide" data-seccion="estructuras" data-titulo="La pila (stack)">
+        <div class="lamina">
+          <h2 class="titulo">La pila · LIFO</h2>
+          <div class="dos centro">
+            <div class="texto">
+              <p class="bajada">
+                <strong>Last In, First Out:</strong> el último elemento que entra es el primero que
+                sale. Solo se trabaja por un extremo, llamado <strong>tope</strong>.
+              </p>
+              <ul class="estaciones">
+                <li><span class="ruta">push(x)</span> apila un elemento en el tope.</li>
+                <li><span class="ruta">pop()</span> saca y devuelve el del tope.</li>
+                <li><span class="ruta">tope()</span> mira el de arriba sin sacarlo (también <em>peek</em>).</li>
+                <li><span class="ruta">vacia</span> indica si no queda nada.</li>
+              </ul>
+              <p>Pensalo como la pila de parciales para corregir: el último que dejaron arriba es el primero que agarrás.</p>
+            </div>
+            <div class="demo" data-demo="pila">
+              <div class="dp-contenedor" aria-live="polite"></div>
+              <div class="botonera" style="justify-content: center">
+                <button class="btn primario" data-accion="push">push()</button>
+                <button class="btn" data-accion="pop">pop()</button>
+                <button class="btn" data-accion="tope">tope()</button>
+              </div>
+              <output class="consola">› pila = [A, B, C]</output>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Hacer push un par de veces y preguntar antes de cada pop: "¿cuál va a salir?".</p>
+        </aside>
+      </section>
+
+      <!-- 7 · Cola -->
+      <section class="slide" data-seccion="estructuras" data-titulo="La cola (queue)">
+        <div class="lamina">
+          <h2 class="titulo">La cola · FIFO</h2>
+          <div class="dos centro">
+            <div class="texto">
+              <p class="bajada">
+                <strong>First In, First Out:</strong> el primero que llega es el primero que sale.
+                Se agrega por el <strong>final</strong> y se saca por el <strong>frente</strong>.
+              </p>
+              <ul class="estaciones">
+                <li><span class="ruta">encolar(x)</span> agrega al final (<em>enqueue</em>).</li>
+                <li><span class="ruta">desencolar()</span> saca el del frente (<em>dequeue</em>).</li>
+                <li><span class="ruta">frente()</span> mira quién sigue sin sacarlo.</li>
+              </ul>
+              <p>Es la fila del comedor: nadie se cuela, se atiende en orden de llegada.</p>
+            </div>
+            <div class="demo" data-demo="cola">
+              <div class="dc-extremos"><span>← sale (frente)</span><span>entra (final) ←</span></div>
+              <div class="dc-contenedor" aria-live="polite"></div>
+              <div class="botonera" style="justify-content: center">
+                <button class="btn primario" data-accion="encolar">encolar()</button>
+                <button class="btn" data-accion="desencolar">desencolar()</button>
+                <button class="btn" data-accion="frente">frente()</button>
+              </div>
+              <output class="consola">› cola = [Ana, Beto, Caro]</output>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Contrastar con la pila: con los mismos datos de entrada, sale otro elemento. La estructura define el comportamiento.</p>
+        </aside>
+      </section>
+
+      <!-- 8 · Comparación -->
+      <section class="slide" data-seccion="estructuras" data-titulo="Pila vs cola">
+        <div class="lamina">
+          <h2 class="titulo">Pila vs cola, lado a lado</h2>
+          <div class="tabla-scroll">
+            <table>
+              <thead>
+                <tr><th></th><th>Pila (stack)</th><th>Cola (queue)</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>Orden</strong></td><td>LIFO: último en entrar, primero en salir</td><td>FIFO: primero en entrar, primero en salir</td></tr>
+                <tr><td><strong>Entra por</strong></td><td>el tope</td><td>el final</td></tr>
+                <tr><td><strong>Sale por</strong></td><td>el tope (el mismo extremo)</td><td>el frente (el extremo opuesto)</td></tr>
+                <tr><td><strong>En JavaScript</strong></td><td><code>array.push()</code> + <code>array.pop()</code></td><td><code>array.push()</code> + <code>array.shift()</code></td></tr>
+                <tr><td><strong>Vida real</strong></td><td>Ctrl+Z, pila de platos, historial del navegador</td><td>fila del banco, cola de impresión, mensajes por enviar</td></tr>
+                <tr><td><strong>En una app móvil</strong></td><td>el historial de pantallas de un Stack</td><td>acciones de navegación esperando ejecutarse</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="aviso tip">
+            <span class="etiqueta">Truco para recordar</span>
+            Pila = platos (se sacan de arriba). Cola = fila (se atiende al primero).
+          </div>
+        </div>
+        <aside class="notas">
+          <p>La última fila de la tabla es el puente al tema de la clase: la próxima diapositiva lo muestra con código real.</p>
+        </aside>
+      </section>
+
+      <!-- 9 · En código -->
+      <section class="slide" data-seccion="estructuras" data-titulo="Pila y cola en código">
+        <div class="lamina">
+          <h2 class="titulo">Implementarlas en JavaScript</h2>
+          <div class="dos">
+            <script type="text/plain" data-codigo="js" data-archivo="pila.js">
+              class Pila {
+                #items = [];
+
+                push(x) { this.#items.push(x); }
+                pop() { return this.#items.pop(); }
+                tope() { return this.#items.at(-1); }
+                get vacia() { return this.#items.length === 0; }
+              }
+
+              const p = new Pila();
+              p.push('A'); p.push('B'); p.push('C');
+              console.log(p.pop()); // ¿qué imprime?
+            </script>
+            <script type="text/plain" data-codigo="js" data-archivo="cola.js">
+              class Cola {
+                #items = [];
+
+                encolar(x) { this.#items.push(x); }
+                desencolar() { return this.#items.shift(); }
+                frente() { return this.#items[0]; }
+                get vacia() { return this.#items.length === 0; }
+              }
+
+              const c = new Cola();
+              c.encolar('A'); c.encolar('B'); c.encolar('C');
+              console.log(c.desencolar()); // ¿qué imprime?
+            </script>
+          </div>
+          <div class="dos">
+            <div class="pila-v">
+              <button class="btn primario" data-revelar="resp-codigo" style="justify-self: start">Ver respuestas</button>
+              <div class="respuesta" id="resp-codigo" hidden>p.pop() → 'C' (el último que entró) · c.desencolar() → 'A' (el primero que llegó)</div>
+            </div>
+            <div class="aviso ojo">
+              <span class="etiqueta">Para pensar</span>
+              <code>shift()</code> corre todos los elementos un lugar: con colas muy grandes es lento
+              (O(n)). Por eso las colas “serias” usan un índice o una lista enlazada.
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p><code>#items</code> es un campo privado de clase: nadie de afuera puede tocar el array y "colarse" en la fila.</p>
+        </aside>
+      </section>
+
+      <!-- 10 · En la navegación -->
+      <section class="slide" data-seccion="estructuras" data-titulo="¿Dónde aparecen al navegar?">
+        <div class="lamina">
+          <h2 class="titulo">¿Y dónde están en Expo Router?</h2>
+          <div class="dos">
+            <div class="pila-v">
+              <h3 class="subtitulo">Una pila: el historial</h3>
+              <p>Cada <span class="ruta">Stack</span> guarda sus pantallas en un array. La visible es el tope; “atrás” hace pop.</p>
+              <script type="text/plain" data-codigo="json" data-archivo="navigation.getState() (resumido)">
+                {
+                  "type": "stack",
+                  "index": 2,
+                  "routes": [
+                    { "name": "(tabs)" },
+                    { "name": "pila/[nivel]", "params": { "nivel": "1" } },
+                    { "name": "pila/[nivel]", "params": { "nivel": "2" } }
+                  ]
+                }
+              </script>
+            </div>
+            <div class="pila-v">
+              <h3 class="subtitulo">Una cola: las acciones</h3>
+              <p>Cada <span class="ruta">router.push</span> o toque en un <span class="ruta">Link</span> se encola y se ejecuta en orden de llegada.</p>
+              <script type="text/plain" data-codigo="js" data-archivo="expo-router/build/global-state/routingQueue.js (simplificado)">
+                export const routingQueue = {
+                  queue: [],
+
+                  add(action) {
+                    this.queue.push(action);            // encolar
+                  },
+
+                  run(ref) {
+                    const events = this.queue;
+                    this.queue = [];
+                    let action;
+                    while ((action = events.shift())) { // desencolar: FIFO
+                      ref.current.dispatch(action);
+                    }
+                  },
+                };
+              </script>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>El código de la derecha está sacado del paquete real (node_modules/expo-router, versión 57.0.20), solo se quitaron detalles. Vale la pena abrirlo en el editor con ellos.</p>
+          <p>Si tocás dos links muy rápido, las dos acciones se procesan en el orden en que llegaron.</p>
+        </aside>
+      </section>
+
+      <!-- =====================================================================
+           LÍNEA F · FUNDAMENTOS
+           ===================================================================== -->
+
+      <!-- 11 · Crear el proyecto -->
+      <section class="slide" data-seccion="fundamentos" data-titulo="Crear el proyecto">
+        <div class="lamina">
+          <h2 class="titulo">Crear un proyecto con Expo Router</h2>
+          <div class="dos">
+            <div class="pila-v">
+              <script type="text/plain" data-codigo="bash" data-archivo="terminal">
+                # 1. Crear la app (ya trae Expo Router configurado)
+                $ npx create-expo-app@latest mi-app
+                $ cd mi-app
+
+                # 2. Iniciar el servidor de desarrollo
+                $ npx expo start
+
+                # 3. Instalar paquetes compatibles con el SDK
+                $ npx expo install expo-image
+              </script>
+              <ul class="estaciones">
+                <li>Escaneá el QR con <strong>Expo Go</strong> (versión para SDK 57).</li>
+                <li>Celular y compu en la misma red Wi-Fi, o usá <span class="ruta">npx expo start --tunnel</span>.</li>
+              </ul>
+            </div>
+            <div class="pila-v">
+              <script type="text/plain" data-codigo="json" data-archivo="package.json">
+                {
+                  "main": "expo-router/entry",
+                  "dependencies": {
+                    "expo": "~57.0.21",
+                    "expo-router": "~57.0.20"
+                  }
+                }
+              </script>
+              <script type="text/plain" data-codigo="json" data-archivo="app.json">
+                {
+                  "expo": {
+                    "scheme": "rutasipf",
+                    "plugins": ["expo-router"],
+                    "experiments": { "typedRoutes": true }
+                  }
+                }
+              </script>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p><code>main: "expo-router/entry"</code> reemplaza al viejo App.tsx: el punto de entrada ahora es la carpeta de rutas.</p>
+          <p><code>scheme</code> es el prefijo de los deep links (rutasipf://...). Lo vemos al final.</p>
+        </aside>
+      </section>
+
+      <!-- 12 · Un archivo = una ruta (explorador) -->
+      <section class="slide" data-seccion="fundamentos" data-titulo="Un archivo = una ruta">
+        <div class="lamina">
+          <h2 class="titulo">Un archivo = una ruta</h2>
+          <p class="bajada">Estos son los archivos reales de la app de ejemplo. Tocá uno para ver qué URL genera.</p>
+          <div class="explorador" data-demo="explorador">
+            <ul class="arbol" aria-label="Archivos de src/app"></ul>
+            <div class="detalle-ruta">
+              <span class="detalle-tipo"></span>
+              <div class="detalle-url"></div>
+              <p class="detalle-texto"></p>
+              <script type="text/plain" data-codigo="tsx" data-archivo="cualquier pantalla">
+                // Una ruta es un componente exportado por defecto
+                export default function Pantalla() {
+                  return <Text>Hola</Text>;
+                }
+              </script>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Hacer notar que las carpetas entre paréntesis no aparecen en la URL y que los _layout no son pantallas.</p>
+        </aside>
+      </section>
+
+      <!-- 13 · Convenciones -->
+      <section class="slide" data-seccion="fundamentos" data-titulo="Convenciones de nombres">
+        <div class="lamina">
+          <h2 class="titulo">Convenciones de nombres</h2>
+          <div class="tabla-scroll">
+            <table>
+              <thead>
+                <tr><th>Archivo o carpeta</th><th>URL de ejemplo</th><th>Para qué sirve</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>index.tsx</code></td><td><code>/</code></td><td>Ruta por defecto de su carpeta.</td></tr>
+                <tr><td><code>perfil.tsx</code></td><td><code>/perfil</code></td><td>Ruta estática: el nombre del archivo es la URL.</td></tr>
+                <tr><td><code>[id].tsx</code></td><td><code>/productos/7</code></td><td>Segmento dinámico: captura <strong>un</strong> valor.</td></tr>
+                <tr><td><code>[...slug].tsx</code></td><td><code>/docs/a/b/c</code></td><td>Catch-all: captura <strong>uno o más</strong> segmentos.</td></tr>
+                <tr><td><code>(tabs)/</code></td><td><em>no aparece</em></td><td>Grupo: organiza y comparte un layout sin cambiar la URL.</td></tr>
+                <tr><td><code>_layout.tsx</code></td><td>—</td><td>Define el navegador (Stack, Tabs, Drawer) de la carpeta.</td></tr>
+                <tr><td><code>+not-found.tsx</code></td><td>cualquier ruta inexistente</td><td>Pantalla 404.</td></tr>
+                <tr><td><em>generada</em></td><td><code>/_sitemap</code></td><td>Lista todas las rutas de la app. Útil para depurar.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="aviso ojo">
+            <span class="etiqueta">Ojo</span>
+            Dentro de <span class="ruta">src/app</span> solo van rutas. Componentes, hooks y datos van en otras carpetas (<span class="ruta">src/components</span>, <span class="ruta">src/data</span>…).
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Probar /_sitemap en la app o en el navegador con <code>npx expo start --web</code>.</p>
+        </aside>
+      </section>
+
+      <!-- 14 · Layouts -->
+      <section class="slide" data-seccion="fundamentos" data-titulo="Layouts">
+        <div class="lamina">
+          <h2 class="titulo"><code>_layout.tsx</code>: el que decide cómo se muestra</h2>
+          <div class="dos">
+            <div class="pila-v">
+              <p class="bajada">
+                Un layout envuelve a todas las rutas de su carpeta y subcarpetas. Devuelve un
+                <strong>navegador</strong>: <span class="ruta">Stack</span>, <span class="ruta">Tabs</span>,
+                <span class="ruta">Drawer</span> o un simple <span class="ruta">Slot</span>.
+              </p>
+              <div class="nido" style="--c: var(--l-fundamentos)">
+                <div class="nido-titulo">app/_layout.tsx <span class="tipo">Stack</span></div>
+                <div class="nido" style="--c: var(--l-navegadores)">
+                  <div class="nido-titulo">(tabs)/_layout.tsx <span class="tipo">Tabs</span></div>
+                  <div class="nido" style="--c: var(--l-dinamicas)">
+                    <div class="nido-titulo">productos/_layout.tsx <span class="tipo">Stack</span></div>
+                    <div class="nido-hijos"><span class="hoja">index.tsx</span><span class="hoja">[id].tsx</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="pila-v">
+              <script type="text/plain" data-codigo="tsx" data-archivo="src/app/_layout.tsx">
+                import { Stack } from 'expo-router';
+
+                export default function LayoutRaiz() {
+                  return (
+                    <Stack>
+                      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                      <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+                    </Stack>
+                  );
+                }
+              </script>
+              <script type="text/plain" data-codigo="tsx" data-archivo="Slot: sin navegador, solo un marco">
+                import { Slot } from 'expo-router';
+
+                export default function Layout() {
+                  return (
+                    <View style={{ flex: 1 }}>
+                      <Encabezado />
+                      <Slot /> {/* acá se dibuja la ruta hija */}
+                    </View>
+                  );
+                }
+              </script>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>El layout raíz también es el lugar para los providers globales: tema, sesión, gestos.</p>
+        </aside>
+      </section>
+
+      <!-- 15 · Link -->
+      <section class="slide" data-seccion="fundamentos" data-titulo="Navegar con Link">
+        <div class="lamina">
+          <h2 class="titulo">Navegar con <code>&lt;Link&gt;</code></h2>
+          <div class="dos">
+            <script type="text/plain" data-codigo="tsx" data-archivo="src/app/(tabs)/index.tsx">
+              import { Link } from 'expo-router';
+
+              // 1. href como texto
+              <Link href="/perfil">Ir al perfil</Link>
+
+              // 2. href como objeto (ideal para rutas dinámicas)
+              <Link href={{ pathname: '/productos/[id]', params: { id: '3' } }}>
+                Ver producto 3
+              </Link>
+
+              // 3. Cambiar la acción
+              <Link href="/perfil" push>Siempre apila</Link>
+              <Link href="/login" replace>Reemplaza la actual</Link>
+
+              // 4. asChild: Link le pasa onPress a su hijo
+              <Link href="/modal" asChild>
+                <Boton titulo="Abrir modal" />
+              </Link>
+            </script>
+            <div class="pila-v">
+              <ul class="estaciones">
+                <li>Por defecto <span class="ruta">Link</span> dibuja un <span class="ruta">&lt;Text&gt;</span> tocable.</li>
+                <li>En web se convierte en un <span class="ruta">&lt;a href&gt;</span> real: se puede abrir en otra pestaña.</li>
+                <li>Con <span class="ruta">asChild</span> usás tu propio componente (un botón, una tarjeta).</li>
+                <li>Props de acción: <span class="ruta">push</span>, <span class="ruta">replace</span>, <span class="ruta">dismissTo</span>, <span class="ruta">prefetch</span>.</li>
+              </ul>
+              <div class="aviso ojo">
+                <span class="etiqueta">Error real que te vas a cruzar</span>
+                Si el hijo de <span class="ruta">Link asChild</span> recibe <span class="ruta">style={[a, b]}</span>,
+                Expo Router tira: <em>“You are passing an array of styles to a child of &lt;Slot&gt;”</em>.
+                Solución: envolver el hijo en un componente propio.
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>El error del array de estilos aparece solo en desarrollo y es muy común con Pressable. En la app de ejemplo lo resolvemos con TarjetaEjemplo e ItemProducto.</p>
+        </aside>
+      </section>
+
+      <!-- 16 · router -->
+      <section class="slide" data-seccion="fundamentos" data-titulo="Navegar con código">
+        <div class="lamina">
+          <h2 class="titulo">Navegar con código: <code>router</code></h2>
+          <div class="dos">
+            <div class="pila-v">
+              <script type="text/plain" data-codigo="tsx" data-archivo="login.tsx">
+                import { router } from 'expo-router';
+                // o dentro de un componente: const router = useRouter();
+
+                async function ingresar() {
+                  await api.login(usuario, clave);
+                  router.replace('/perfil'); // sin volver al login con "atrás"
+                }
+              </script>
+              <div class="aviso tip">
+                <span class="etiqueta">¿Link o router?</span>
+                <span><span class="ruta">Link</span> cuando el usuario toca algo. <span class="ruta">router</span> cuando navegás después de una lógica: guardar, validar, esperar una API.</span>
+              </div>
+            </div>
+            <div class="tabla-scroll">
+              <table>
+                <thead><tr><th>Método</th><th>Qué le hace a la pila</th></tr></thead>
+                <tbody>
+                  <tr><td><code>push(href)</code></td><td>Apila una pantalla nueva. Siempre.</td></tr>
+                  <tr><td><code>navigate(href)</code></td><td>Apila, salvo que el destino sea la pantalla visible: ahí solo cambia sus params.</td></tr>
+                  <tr><td><code>replace(href)</code></td><td>Cambia el tope por otra pantalla. La pila no crece.</td></tr>
+                  <tr><td><code>back()</code></td><td>Pop: saca el tope.</td></tr>
+                  <tr><td><code>dismiss(n)</code></td><td>Saca <em>n</em> pantallas de una vez.</td></tr>
+                  <tr><td><code>dismissTo(href)</code></td><td>Desapila hasta encontrar esa ruta.</td></tr>
+                  <tr><td><code>dismissAll()</code></td><td>Vuelve a la primera pantalla de la pila.</td></tr>
+                  <tr><td><code>canGoBack()</code></td><td>¿Hay algo debajo? Devuelve <code>true</code> o <code>false</code>.</td></tr>
+                  <tr><td><code>setParams({...})</code></td><td>Cambia los params de la pantalla actual.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>La diferencia push/navigate confunde mucho. Mostrarla en el simulador de la próxima diapositiva y en la pantalla "Pila de navegación" de la app.</p>
+        </aside>
+      </section>
+
+      <!-- 17 · Simulador -->
+      <section class="slide" data-seccion="fundamentos" data-titulo="Simulador de Stack">
+        <div class="lamina">
+          <h2 class="titulo">Simulador: la pila en vivo</h2>
+          <div class="simulador" data-demo="stack">
+            <div class="telefono sim-telefono">
+              <div class="telefono-pantalla">
+                <div class="sim-header"><span class="sim-atras" aria-hidden="true"></span><span class="sim-titulo"></span></div>
+                <div class="sim-contenido"></div>
+              </div>
+            </div>
+            <div class="sim-pila-wrap pila-v">
+              <span class="etiqueta">Pila del Stack</span>
+              <div class="sim-pila" aria-live="polite"></div>
+              <div class="sim-base">base</div>
+            </div>
+            <div class="sim-controles">
+              <div class="botonera">
+                <button class="btn primario" data-sim="push-producto">router.push('/productos/N')</button>
+                <button class="btn" data-sim="navigate-producto">router.navigate('/productos/N')</button>
+                <button class="btn" data-sim="push-perfil">router.push('/perfil')</button>
+                <button class="btn" data-sim="replace-perfil">router.replace('/perfil')</button>
+                <button class="btn" data-sim="back">router.back()</button>
+                <button class="btn" data-sim="dismissto">router.dismissTo('/productos')</button>
+                <button class="btn" data-sim="dismissall">router.dismissAll()</button>
+              </div>
+              <output class="consola sim-llamada">› estado inicial</output>
+              <p class="sim-explicacion">Estás viendo un producto. Probá cada botón y mirá qué pasa con la pila.</p>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Secuencia sugerida: push 2 veces → navigate (no crece) → back → replace → dismissTo → dismissAll.</p>
+        </aside>
+      </section>
+
+      <!-- =====================================================================
+           LÍNEA N · NAVEGADORES
+           ===================================================================== -->
+
+      <!-- 18 · Stack -->
+      <section class="slide" data-seccion="navegadores" data-titulo="Stack">
+        <div class="lamina">
+          <h2 class="titulo">Stack: pantallas apiladas</h2>
+          <div class="dos">
+            <script type="text/plain" data-codigo="tsx" data-archivo="src/app/_layout.tsx">
+              import { Stack } from 'expo-router';
+
+              export default function LayoutRaiz() {
+                return (
+                  <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="pila/[nivel]" options={{ title: 'Pila' }} />
+                    <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+                    <Stack.Screen
+                      name="hoja"
+                      options={{
+                        presentation: 'formSheet',
+                        sheetAllowedDetents: [0.5, 0.9],
+                        sheetGrabberVisible: true,
+                      }}
+                    />
+                  </Stack>
+                );
+              }
+            </script>
+            <div class="pila-v">
+              <ul class="estaciones">
+                <li>Header con título y flecha atrás, automático.</li>
+                <li>Gesto de volver y animaciones nativas (usa <span class="ruta">react-native-screens</span>).</li>
+                <li><span class="ruta">screenOptions</span> aplica a todas; <span class="ruta">Stack.Screen</span> configura una.</li>
+                <li><span class="ruta">presentation</span>: <span class="ruta">'card'</span> (normal), <span class="ruta">'modal'</span>, <span class="ruta">'formSheet'</span>, <span class="ruta">'transparentModal'</span>…</li>
+              </ul>
+              <script type="text/plain" data-codigo="tsx" data-archivo="título dinámico desde la pantalla">
+                export default function Detalle() {
+                  const { id } = useLocalSearchParams();
+                  return (
+                    <>
+                      <Stack.Screen options={{ title: `Producto ${id}` }} />
+                      {/* ... */}
+                    </>
+                  );
+                }
+              </script>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>No hace falta declarar todas las pantallas en el Stack: las que no están se agregan solas. Se declaran para darles opciones.</p>
+        </aside>
+      </section>
+
+      <!-- 19 · Tabs -->
+      <section class="slide" data-seccion="navegadores" data-titulo="Tabs">
+        <div class="lamina">
+          <h2 class="titulo">Tabs: secciones con pestañas</h2>
+          <div class="dos">
+            <script type="text/plain" data-codigo="tsx" data-archivo="src/app/(tabs)/_layout.tsx">
+              import Ionicons from '@expo/vector-icons/Ionicons';
+              import { Tabs } from 'expo-router/js-tabs';
+
+              export default function LayoutTabs() {
+                return (
+                  <Tabs screenOptions={{ tabBarActiveTintColor: '#4F46E5' }}>
+                    <Tabs.Screen
+                      name="index"
+                      options={{
+                        title: 'Inicio',
+                        tabBarIcon: ({ color, size }) => (
+                          <Ionicons name="home" size={size} color={color} />
+                        ),
+                      }}
+                    />
+                    <Tabs.Screen name="productos" options={{ headerShown: false }} />
+                    <Tabs.Screen name="perfil" options={{ tabBarBadge: '!' }} />
+                  </Tabs>
+                );
+              }
+            </script>
+            <div class="pila-v">
+              <ul class="estaciones">
+                <li>Cada archivo o carpeta dentro de <span class="ruta">(tabs)</span> es una pestaña.</li>
+                <li>El grupo <span class="ruta">(tabs)</span> no aparece en la URL: la pestaña Perfil es <span class="ruta">/perfil</span>.</li>
+                <li><span class="ruta">tabBarIcon</span>, <span class="ruta">tabBarBadge</span>, <span class="ruta">title</span> se configuran por pestaña.</li>
+              </ul>
+              <div class="aviso ojo">
+                <span class="etiqueta">Cambió en SDK 57</span>
+                <span>Importar <span class="ruta">Tabs</span> desde <span class="ruta">'expo-router'</span> está deprecado. Usá <span class="ruta">'expo-router/js-tabs'</span>.</span>
+              </div>
+              <div class="aviso tip">
+                <span class="etiqueta">Alternativa</span>
+                <span><span class="ruta">NativeTabs</span> (desde <span class="ruta">'expo-router/unstable-native-tabs'</span>) usa la barra nativa del sistema. Todavía es experimental.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>La app de ejemplo usa js-tabs porque funciona igual en Android, iOS y web, y permite íconos de @expo/vector-icons.</p>
+        </aside>
+      </section>
+
+      <!-- 20 · Tabs no son pila -->
+      <section class="slide" data-seccion="navegadores" data-titulo="Cada tab tiene su pila">
+        <div class="lamina">
+          <h2 class="titulo">Las tabs no apilan: cada una tiene su pila</h2>
+          <p class="bajada">
+            Cambiar de pestaña no agrega pantallas: solo cambia cuál se ve. Pero adentro de una
+            pestaña puede haber un Stack con su propio historial. Probalo:
+          </p>
+          <div class="demo" data-demo="tabs">
+            <div class="demo-tabs"></div>
+            <div class="botonera">
+              <button class="btn primario" data-tabs="push">push en la tab activa</button>
+              <button class="btn" data-tabs="back">back()</button>
+            </div>
+            <output class="consola">› Tab activa: Productos</output>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Hacer push en Productos, cambiar a Inicio y volver: el detalle sigue ahí. Es lo que pasa en Instagram o en la app del banco.</p>
+        </aside>
+      </section>
+
+      <!-- 21 · Drawer -->
+      <section class="slide" data-seccion="navegadores" data-titulo="Drawer">
+        <div class="lamina">
+          <h2 class="titulo">Drawer: el menú lateral</h2>
+          <div class="dos">
+            <script type="text/plain" data-codigo="tsx" data-archivo="src/app/menu/_layout.tsx">
+              import { Drawer } from 'expo-router/drawer';
+
+              export default function LayoutMenu() {
+                return (
+                  <Drawer>
+                    <Drawer.Screen name="index" options={{ title: 'Bandeja' }} />
+                    <Drawer.Screen name="favoritos" options={{ title: 'Favoritos' }} />
+                    <Drawer.Screen name="papelera" options={{ title: 'Papelera' }} />
+                  </Drawer>
+                );
+              }
+            </script>
+            <div class="pila-v">
+              <ul class="estaciones">
+                <li>Se abre con el ícono ☰ o deslizando desde el borde.</li>
+                <li>Como las tabs, no apila: cambia la sección visible.</li>
+                <li>Sirve cuando hay muchas secciones que no entran en una barra de pestañas.</li>
+                <li>Necesita <span class="ruta">react-native-gesture-handler</span> y <span class="ruta">react-native-reanimated</span> (ya vienen en Expo Go).</li>
+              </ul>
+              <script type="text/plain" data-codigo="tsx" data-archivo="src/app/_layout.tsx">
+                import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <Stack />
+                </GestureHandlerRootView>
+              </script>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>En SDK 57 el Drawer ya viene dentro de expo-router: no hace falta instalar @react-navigation/drawer.</p>
+        </aside>
+      </section>
+
+      <!-- 22 · Anidados -->
+      <section class="slide" data-seccion="navegadores" data-titulo="Navegadores anidados">
+        <div class="lamina">
+          <h2 class="titulo">Navegadores anidados</h2>
+          <div class="dos">
+            <div class="nido" style="--c: var(--l-fundamentos)">
+              <div class="nido-titulo">app/ <span class="tipo">Stack raíz</span></div>
+              <div class="nido" style="--c: var(--l-navegadores)">
+                <div class="nido-titulo">(tabs)/ <span class="tipo">Tabs</span></div>
+                <div class="nido-hijos">
+                  <span class="hoja">index</span>
+                  <div class="nido" style="--c: var(--l-dinamicas)">
+                    <div class="nido-titulo">productos/ <span class="tipo">Stack</span></div>
+                    <div class="nido-hijos"><span class="hoja">index</span><span class="hoja">[id]</span></div>
+                  </div>
+                  <span class="hoja">perfil</span>
+                </div>
+              </div>
+              <div class="nido-hijos">
+                <span class="hoja">pila/[nivel]</span>
+                <span class="hoja">estructuras</span>
+                <span class="hoja">buscar</span>
+                <span class="hoja">docs/[...slug]</span>
+                <span class="hoja">modal</span>
+                <span class="hoja">hoja</span>
+                <span class="hoja">login</span>
+              </div>
+              <div class="nido" style="--c: var(--l-contexto)">
+                <div class="nido-titulo">menu/ <span class="tipo">Drawer</span></div>
+                <div class="nido-hijos"><span class="hoja">index</span><span class="hoja">favoritos</span><span class="hoja">papelera</span></div>
+              </div>
+              <div class="nido" style="--c: var(--l-acceso)">
+                <div class="nido-titulo">privado/ <span class="tipo">Stack protegido</span></div>
+                <div class="nido-hijos"><span class="hoja">index</span><span class="hoja">ajustes</span></div>
+              </div>
+            </div>
+            <div class="pila-v">
+              <p class="bajada">Este es el árbol completo de la app de ejemplo. Un navegador puede contener a otros.</p>
+              <ul class="estaciones">
+                <li><strong>Tabs dentro de un Stack:</strong> la barra de pestañas desaparece cuando abrís un modal o la pila de ejemplo.</li>
+                <li><strong>Stack dentro de una tab:</strong> el detalle de un producto se abre sin tapar la barra de pestañas.</li>
+                <li><span class="ruta">back()</span> vuelve en el navegador <strong>más cercano</strong> que tenga algo para sacar.</li>
+              </ul>
+              <div class="aviso tip">
+                <span class="etiqueta">Regla práctica</span>
+                ¿La pantalla debe tapar las tabs? Ponela en el Stack raíz. ¿Debe mantenerlas? Ponela dentro de la tab.
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Mostrar en la app: Productos → detalle (las tabs siguen) vs Inicio → Pila de navegación (las tabs se tapan).</p>
+        </aside>
+      </section>
+
+      <!-- =====================================================================
+           LÍNEA D · RUTAS DINÁMICAS
+           ===================================================================== -->
+
+      <!-- 23 · [id] -->
+      <section class="slide" data-seccion="dinamicas" data-titulo="Rutas dinámicas">
+        <div class="lamina">
+          <h2 class="titulo">Rutas dinámicas <code>[id]</code></h2>
+          <div class="dos">
+            <div class="pila-v">
+              <script type="text/plain" data-codigo="tsx" data-archivo="src/app/(tabs)/productos/[id].tsx">
+                import { useLocalSearchParams } from 'expo-router';
+
+                export default function DetalleProducto() {
+                  const { id } = useLocalSearchParams<{ id: string }>();
+                  const producto = productos.find((p) => p.id === id);
+
+                  if (!producto) {
+                    return <Text>No existe el producto {id}</Text>;
+                  }
+                  return <Text>{producto.nombre}</Text>;
+                }
+              </script>
+              <div class="aviso ojo">
+                <span class="etiqueta">Los params siempre son texto</span>
+                <span>En <span class="ruta">/productos/7</span>, <span class="ruta">id</span> vale <span class="ruta">"7"</span>, no <span class="ruta">7</span>. Si necesitás un número: <span class="ruta">Number(id)</span>.</span>
+              </div>
+            </div>
+            <div class="probador" data-demo="probador">
+              <label for="probador-url">Probador de rutas de la app</label>
+              <div class="probador-entrada">
+                <span>rutasipf:/</span>
+                <input id="probador-url" type="text" value="/productos/7" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="chips">
+                <button class="chip">/productos/7</button>
+                <button class="chip">/productos/mate</button>
+                <button class="chip">/docs/guia/rutas</button>
+                <button class="chip">/pila/3</button>
+                <button class="chip">/buscar?q=chipa</button>
+                <button class="chip">/perfil</button>
+                <button class="chip">/no-existe</button>
+              </div>
+              <div class="probador-resultado" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Escribir URLs a mano con la clase. Probar /productos/mate: la ruta coincide aunque el producto no exista. Validar el dato es trabajo nuestro.</p>
+        </aside>
+      </section>
+
+      <!-- 24 · Catch-all -->
+      <section class="slide" data-seccion="dinamicas" data-titulo="Catch-all">
+        <div class="lamina">
+          <h2 class="titulo">Catch-all <code>[...slug]</code></h2>
+          <div class="dos">
+            <script type="text/plain" data-codigo="tsx" data-archivo="src/app/docs/[...slug].tsx">
+              import { Link, useLocalSearchParams } from 'expo-router';
+
+              export default function Documentacion() {
+                const { slug } = useLocalSearchParams<{ slug: string[] }>();
+
+                return (
+                  <>
+                    <Text>{slug.join(' / ')}</Text>
+                    <Link href={{ pathname: '/docs/[...slug]', params: { slug: [...slug, 'mas'] } }}>
+                      Entrar un nivel más
+                    </Link>
+                  </>
+                );
+              }
+            </script>
+            <div class="pila-v">
+              <div class="tabla-scroll">
+                <table>
+                  <thead><tr><th>URL</th><th>slug</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>/docs/guia</code></td><td><code>['guia']</code></td></tr>
+                    <tr><td><code>/docs/guia/rutas</code></td><td><code>['guia', 'rutas']</code></td></tr>
+                    <tr><td><code>/docs/a/b/c/d</code></td><td><code>['a', 'b', 'c', 'd']</code></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="aviso tip">
+                <span class="etiqueta">¿Cuándo usarlo?</span>
+                Rutas de profundidad variable: carpetas, categorías anidadas, documentación, un blog con fechas.
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Para darle una pantalla propia a /docs, agregá docs/index.tsx al lado del catch-all: las rutas más específicas tienen prioridad.</p>
+        </aside>
+      </section>
+
+      <!-- 25 · Query params -->
+      <section class="slide" data-seccion="dinamicas" data-titulo="Parámetros de búsqueda">
+        <div class="lamina">
+          <h2 class="titulo">Parámetros de búsqueda <code>?q=</code></h2>
+          <div class="anatomia" aria-label="Partes de una URL">
+            <span><b style="--c: var(--l-contexto)">rutasipf://</b><small>scheme</small></span>
+            <span><b style="--c: var(--l-fundamentos)">buscar</b><small>ruta</small></span>
+            <span><b style="--c: var(--l-contexto)">?</b><small>&nbsp;</small></span>
+            <span><b style="--c: var(--l-dinamicas)">q=mate</b><small>param</small></span>
+            <span><b style="--c: var(--l-contexto)">&amp;</b><small>&nbsp;</small></span>
+            <span><b style="--c: var(--l-dinamicas)">categoria=bebidas</b><small>param</small></span>
+          </div>
+          <div class="dos">
+            <script type="text/plain" data-codigo="tsx" data-archivo="src/app/buscar.tsx">
+              import { router, useLocalSearchParams } from 'expo-router';
+
+              export default function Buscar() {
+                const { q = '', categoria } = useLocalSearchParams<{
+                  q?: string;
+                  categoria?: string;
+                }>();
+
+                return (
+                  <TextInput
+                    defaultValue={q}
+                    onChangeText={(texto) => router.setParams({ q: texto })}
+                  />
+                );
+              }
+            </script>
+            <div class="pila-v">
+              <ul class="estaciones">
+                <li>No hacen falta corchetes: <span class="ruta">buscar.tsx</span> acepta cualquier <span class="ruta">?clave=valor</span>.</li>
+                <li>Se leen con el mismo hook: <span class="ruta">useLocalSearchParams()</span>.</li>
+                <li><span class="ruta">router.setParams()</span> los cambia <strong>sin apilar</strong> pantallas.</li>
+                <li>Como el estado vive en la URL, la búsqueda se puede compartir con un link.</li>
+              </ul>
+              <script type="text/plain" data-codigo="tsx" data-archivo="enviar params al navegar">
+                <Link href={{ pathname: '/buscar', params: { q: 'mate', categoria: 'bebidas' } }}>
+                  Buscar mate
+                </Link>
+              </script>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Params de ruta ([id]) vs params de búsqueda (?q=): los dos llegan en el mismo objeto.</p>
+        </aside>
+      </section>
+
+      <!-- 26 · Hooks -->
+      <section class="slide" data-seccion="dinamicas" data-titulo="Hooks de ubicación">
+        <div class="lamina">
+          <h2 class="titulo">¿Dónde estoy? Los hooks</h2>
+          <p class="bajada">Valores reales estando en <span class="ruta">/productos/3</span> de la app de ejemplo:</p>
+          <div class="tabla-scroll">
+            <table>
+              <thead><tr><th>Hook</th><th>Devuelve</th><th>Para qué</th></tr></thead>
+              <tbody>
+                <tr><td><code>usePathname()</code></td><td><code>"/productos/3"</code></td><td>La URL actual, sin params de búsqueda.</td></tr>
+                <tr><td><code>useSegments()</code></td><td><code>["(tabs)", "productos", "[id]"]</code></td><td>Las partes del archivo; incluye los grupos.</td></tr>
+                <tr><td><code>useLocalSearchParams()</code></td><td><code>{ id: "3" }</code></td><td>Params de <strong>esta</strong> pantalla. Opción por defecto.</td></tr>
+                <tr><td><code>useGlobalSearchParams()</code></td><td><code>{ id: "3" }</code></td><td>Params de la URL global; se actualiza aunque la pantalla no esté visible.</td></tr>
+                <tr><td><code>useNavigation()</code></td><td>objeto <code>navigation</code></td><td>Acceso al navegador: <code>getState()</code>, <code>setOptions()</code>, eventos.</td></tr>
+                <tr><td><code>useFocusEffect(cb)</code></td><td>—</td><td>Ejecuta código cada vez que la pantalla gana foco.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="aviso ojo">
+            <span class="etiqueta">Local vs global</span>
+            Una pantalla que quedó abajo en la pila no se vuelve a renderizar con <span class="ruta">useLocalSearchParams</span> cuando cambia la URL de arriba. Con <span class="ruta">useGlobalSearchParams</span> sí: más renders de los necesarios.
+          </div>
+        </div>
+        <aside class="notas">
+          <p>En la app, cada ejemplo tiene al final el recuadro "¿Dónde estoy?" con estos hooks en vivo.</p>
+        </aside>
+      </section>
+
+      <!-- =====================================================================
+           LÍNEA A · ACCESO Y ERRORES
+           ===================================================================== -->
+
+      <!-- 27 · Redirect -->
+      <section class="slide" data-seccion="acceso" data-titulo="Redirect">
+        <div class="lamina">
+          <h2 class="titulo">Redirigir: <code>&lt;Redirect&gt;</code></h2>
+          <div class="dos">
+            <div class="pila-v">
+              <script type="text/plain" data-codigo="tsx" data-archivo="src/app/ruta-vieja.tsx">
+                import { Redirect } from 'expo-router';
+
+                // Esta URL cambió de nombre: mandamos a la nueva
+                export default function RutaVieja() {
+                  return <Redirect href="/productos" />;
+                }
+              </script>
+              <script type="text/plain" data-codigo="tsx" data-archivo="redirigir según una condición">
+                export default function Carrito() {
+                  const { usuario } = useAuth();
+
+                  if (!usuario) {
+                    return <Redirect href="/login" />;
+                  }
+                  return <ListaCarrito />;
+                }
+              </script>
+            </div>
+            <div class="pila-v">
+              <ul class="estaciones">
+                <li><span class="ruta">&lt;Redirect&gt;</span> navega apenas se renderiza.</li>
+                <li><strong>Reemplaza</strong> la ruta actual: la pantalla vieja no queda en el historial.</li>
+                <li>Equivale a <span class="ruta">router.replace()</span>, pero escrito como componente.</li>
+              </ul>
+              <div class="aviso tip">
+                <span class="etiqueta">¿Por qué replace y no push?</span>
+                Con push, al tocar “atrás” el usuario volvería a la ruta que redirige… y lo redirigiría de nuevo. Un bucle.
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>La redirección condicional funciona, pero para proteger varias pantallas existe algo mejor: Stack.Protected.</p>
+        </aside>
+      </section>
+
+      <!-- 28 · Protected -->
+      <section class="slide" data-seccion="acceso" data-titulo="Rutas protegidas">
+        <div class="lamina">
+          <h2 class="titulo">Rutas protegidas: <code>Stack.Protected</code></h2>
+          <div class="dos">
+            <script type="text/plain" data-codigo="tsx" data-archivo="src/app/_layout.tsx">
+              function NavegacionRaiz() {
+                const { usuario } = useAuth();
+                const conSesion = usuario !== null;
+
+                return (
+                  <Stack>
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+                    <Stack.Protected guard={conSesion}>
+                      <Stack.Screen name="privado" />
+                    </Stack.Protected>
+
+                    <Stack.Protected guard={!conSesion}>
+                      <Stack.Screen name="login" options={{ presentation: 'modal' }} />
+                    </Stack.Protected>
+                  </Stack>
+                );
+              }
+            </script>
+            <div class="demo" data-demo="protegidas">
+              <label class="interruptor" for="sesion-demo">
+                <input type="checkbox" id="sesion-demo" />
+                <span>Sesión iniciada: <code class="valor-guard">false</code></span>
+              </label>
+              <span class="etiqueta">Pantallas registradas en el Stack</span>
+              <ul class="pantallas-registradas">
+                <li data-guard="siempre">(tabs) <small>siempre</small></li>
+                <li data-guard="conSesion" class="protegida">privado <small>guard={conSesion}</small></li>
+                <li data-guard="sinSesion" class="protegida">login <small>guard={!conSesion}</small></li>
+              </ul>
+              <ul class="estaciones">
+                <li>Si <span class="ruta">guard</span> es <span class="ruta">false</span>, esas pantallas <strong>no existen</strong> para el navegador.</li>
+                <li>Cuando el guard cambia, las pantallas aparecen o desaparecen del historial solas.</li>
+                <li>Al iniciar sesión, el modal de login se cierra sin llamar a <span class="ruta">router.back()</span>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Probarlo en la app: pestaña Perfil → Iniciar sesión. Después, desde /privado, cerrar sesión y ver cómo desaparece la pantalla.</p>
+          <p>En desarrollo, navegar a una ruta protegida con guard en false muestra un aviso "was not handled by any navigator".</p>
+        </aside>
+      </section>
+
+      <!-- 29 · anchor, +not-found, typed routes -->
+      <section class="slide" data-seccion="acceso" data-titulo="404, anchor y rutas tipadas">
+        <div class="lamina">
+          <h2 class="titulo">404, anchor y rutas tipadas</h2>
+          <div class="tres">
+            <div class="pila-v">
+              <h3 class="subtitulo">+not-found</h3>
+              <p>Se muestra cuando ninguna ruta coincide con la URL.</p>
+              <script type="text/plain" data-codigo="tsx" data-archivo="src/app/+not-found.tsx">
+                export default function NoEncontrada() {
+                  const pathname = usePathname();
+                  return <Text>No existe {pathname}</Text>;
+                }
+              </script>
+            </div>
+            <div class="pila-v">
+              <h3 class="subtitulo">anchor</h3>
+              <p>Qué pantalla queda debajo si alguien entra directo a otra ruta con un deep link.</p>
+              <script type="text/plain" data-codigo="tsx" data-archivo="src/app/_layout.tsx">
+                export const unstable_settings = {
+                  anchor: '(tabs)',
+                };
+              </script>
+            </div>
+            <div class="pila-v">
+              <h3 class="subtitulo">Rutas tipadas</h3>
+              <p>Con <span class="ruta">typedRoutes</span>, TypeScript conoce todas tus rutas.</p>
+              <script type="text/plain" data-codigo="tsx" data-archivo="error antes de ejecutar">
+                <Link href="/prodcutos" />
+                // ✖ Error de TypeScript:
+                //   "/prodcutos" no es un Href válido
+
+                <Link href={'/no-existe' as Href} />
+                // ✔ forzado a propósito (demo 404)
+              </script>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Los tipos se generan en .expo/types al correr <code>npx expo start</code>. Si el editor no los ve, reiniciar el servidor de TypeScript.</p>
+        </aside>
+      </section>
+
+      <!-- 30 · Deep linking -->
+      <section class="slide" data-seccion="acceso" data-titulo="Deep linking">
+        <div class="lamina">
+          <h2 class="titulo">Deep links: abrir la app en una pantalla</h2>
+          <p class="bajada">
+            Como cada pantalla tiene URL, se puede abrir directo desde un link, un QR o una
+            notificación. Expo Router lo resuelve solo.
+          </p>
+          <div class="tabla-scroll">
+            <table>
+              <thead><tr><th>Dónde</th><th>URL para abrir el producto 3</th></tr></thead>
+              <tbody>
+                <tr><td>App instalada (build propia)</td><td><code>rutasipf://productos/3</code></td></tr>
+                <tr><td>Expo Go en desarrollo</td><td><code>exp://192.168.0.10:8081/--/productos/3</code></td></tr>
+                <tr><td>Web</td><td><code>http://localhost:8081/productos/3</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <script type="text/plain" data-codigo="bash" data-archivo="terminal · probar un deep link en Expo Go">
+            # Reemplazá la IP por la que muestra "npx expo start"
+            $ npx uri-scheme open "exp://192.168.0.10:8081/--/productos/3" --android
+            $ npx uri-scheme open "exp://192.168.0.10:8081/--/productos/3" --ios
+          </script>
+        </div>
+        <aside class="notas">
+          <p>En Expo Go la parte "/--/" separa la dirección del servidor de la ruta de la app. El scheme propio (rutasipf://) solo funciona en una build de desarrollo o de producción.</p>
+        </aside>
+      </section>
+
+      <!-- =====================================================================
+           LÍNEA T · TALLER
+           ===================================================================== -->
+
+      <!-- 31 · App de ejemplo -->
+      <section class="slide" data-seccion="taller" data-titulo="La app de ejemplo">
+        <div class="lamina">
+          <h2 class="titulo">La app de ejemplo</h2>
+          <div class="dos">
+            <div class="pila-v">
+              <script type="text/plain" data-codigo="bash" data-archivo="terminal">
+                $ cd app-rutas-expo
+                $ npm install
+                $ npx expo start
+              </script>
+              <ul class="estaciones">
+                <li>Abrí <strong>Expo Go</strong> y escaneá el QR (en iPhone, con la cámara).</li>
+                <li>Cada tarjeta de Inicio abre un ejemplo.</li>
+                <li>Abajo de cada pantalla, el recuadro <strong>¿Dónde estoy?</strong> muestra la URL, los segmentos y los params en vivo.</li>
+              </ul>
+            </div>
+            <div class="tabla-scroll">
+              <table>
+                <thead><tr><th>Ejemplo</th><th>Archivo en src/app</th></tr></thead>
+                <tbody>
+                  <tr><td>Pila de navegación</td><td><code>pila/[nivel].tsx</code></td></tr>
+                  <tr><td>Pila vs cola animadas</td><td><code>estructuras.tsx</code></td></tr>
+                  <tr><td>Modal y hoja inferior</td><td><code>modal.tsx</code> · <code>hoja.tsx</code></td></tr>
+                  <tr><td>Lista → detalle</td><td><code>(tabs)/productos/[id].tsx</code></td></tr>
+                  <tr><td>Catch-all</td><td><code>docs/[...slug].tsx</code></td></tr>
+                  <tr><td>Buscador con params</td><td><code>buscar.tsx</code></td></tr>
+                  <tr><td>Menú lateral</td><td><code>menu/_layout.tsx</code></td></tr>
+                  <tr><td>Rutas protegidas</td><td><code>_layout.tsx</code> · <code>privado/</code></td></tr>
+                  <tr><td>Redirect y 404</td><td><code>ruta-vieja.tsx</code> · <code>+not-found.tsx</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Si Expo Go dice que el proyecto es incompatible, revisar que la versión de Expo Go sea la de SDK 57.</p>
+        </aside>
+      </section>
+
+      <!-- 32 · Errores comunes -->
+      <section class="slide" data-seccion="taller" data-titulo="Errores comunes">
+        <div class="lamina">
+          <h2 class="titulo">Errores comunes (y cómo salir)</h2>
+          <div class="tres">
+            <div class="error-comun">
+              <h3>Comparar el id con un número</h3>
+              <p><code>id === 3</code> nunca es verdadero: los params son texto. Usá <code>Number(id)</code> o compará con <code>'3'</code>.</p>
+            </div>
+            <div class="error-comun">
+              <h3>Array de estilos en Link asChild</h3>
+              <p class="mensaje">You are passing an array of styles to a child of &lt;Slot&gt;</p>
+              <p>Envolvé el hijo en un componente propio que arme su estilo adentro.</p>
+            </div>
+            <div class="error-comun">
+              <h3>Usar push después del login</h3>
+              <p>El usuario vuelve al login con “atrás”. Usá <code>replace</code> o <code>Stack.Protected</code>.</p>
+            </div>
+            <div class="error-comun">
+              <h3>Navegar a una ruta protegida</h3>
+              <p class="mensaje">The action 'NAVIGATE' … was not handled by any navigator</p>
+              <p>Con el guard en false la pantalla no existe. Mostrá el botón solo si hay sesión.</p>
+            </div>
+            <div class="error-comun">
+              <h3>Versiones que no coinciden</h3>
+              <p>Instalar con <code>npm install paquete</code> puede traer una versión que Expo Go no tiene. Usá <code>npx expo install</code>.</p>
+            </div>
+            <div class="error-comun">
+              <h3>Poner cosas que no son rutas en app/</h3>
+              <p>Un <code>Boton.tsx</code> dentro de <code>src/app</code> se vuelve la ruta <code>/Boton</code>. Movelo a <code>src/components</code>.</p>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Los dos mensajes en rojo aparecieron de verdad armando la app de ejemplo con SDK 57.</p>
+        </aside>
+      </section>
+
+      <!-- 33 · Actividad -->
+      <section class="slide" data-seccion="taller" data-titulo="Actividad práctica">
+        <div class="lamina">
+          <h2 class="titulo">Actividad práctica</h2>
+          <p class="bajada">Sobre la app de ejemplo. Los ejercicios van de menor a mayor dificultad.</p>
+          <ol class="ejercicios">
+            <li><strong>Ruta estática</strong><span>Creá <code>/acerca</code> con tu nombre y la materia, y agregá una tarjeta en Inicio que lleve ahí.</span></li>
+            <li><strong>Ruta dinámica</strong><span>Creá <code>/categorias/[categoria]</code> que liste solo los productos de esa categoría.</span></li>
+            <li><strong>Nueva tab con Stack</strong><span>Agregá la pestaña “Carrito” con su propio <code>_layout.tsx</code> y una pantalla de detalle.</span></li>
+            <li><strong>Proteger el carrito</strong><span>Con <code>Stack.Protected</code>, que la pestaña Carrito solo exista con sesión iniciada.</span></li>
+            <li><strong>Desafío: contador de pila</strong><span>Mostrá en el título del header cuántas pantallas hay en la pila, usando <code>useNavigation().getState()</code>.</span></li>
+            <li><strong>Desafío: cola de pedidos</strong><span>Implementá una clase <code>Cola</code> para los pedidos del carrito y una pantalla que los atienda en orden.</span></li>
+          </ol>
+        </div>
+        <aside class="notas">
+          <p>Ejercicio 4: las tabs también tienen <code>Tabs.Protected</code>, que funciona igual que en el Stack.</p>
+        </aside>
+      </section>
+
+      <!-- 34 · Quiz -->
+      <section class="slide" data-seccion="taller" data-titulo="Quiz rápido">
+        <div class="lamina">
+          <div style="display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap">
+            <h2 class="titulo">Quiz rápido</h2>
+            <span class="puntaje" data-puntaje>0 / 6</span>
+          </div>
+          <div class="quiz" data-demo="quiz">
+            <div class="pregunta" data-correcta="1">
+              <p>1. ¿Qué URL tiene <code>src/app/(tabs)/perfil.tsx</code>?</p>
+              <div class="opciones"><button class="btn">/(tabs)/perfil</button><button class="btn">/perfil</button><button class="btn">/tabs/perfil</button></div>
+              <p class="porque" hidden>Los grupos entre paréntesis no forman parte de la URL.</p>
+            </div>
+            <div class="pregunta" data-correcta="1">
+              <p>2. Estás en /a. Hacés push('/b'), push('/c') y back(). ¿Dónde quedás?</p>
+              <div class="opciones"><button class="btn">/a</button><button class="btn">/b</button><button class="btn">/c</button></div>
+              <p class="porque" hidden>Pila [a, b, c] → pop saca c → queda b en el tope.</p>
+            </div>
+            <div class="pregunta" data-correcta="1">
+              <p>3. ¿Qué estructura describe el historial de un Stack?</p>
+              <div class="opciones"><button class="btn">Cola FIFO</button><button class="btn">Pila LIFO</button><button class="btn">Árbol binario</button></div>
+              <p class="porque" hidden>La última pantalla que entró es la primera que sale al volver.</p>
+            </div>
+            <div class="pregunta" data-correcta="1">
+              <p>4. En <code>[id].tsx</code>, ¿de qué tipo es <code>id</code>?</p>
+              <div class="opciones"><button class="btn">number</button><button class="btn">string</button><button class="btn">depende de la URL</button></div>
+              <p class="porque" hidden>Los params de la URL siempre llegan como texto.</p>
+            </div>
+            <div class="pregunta" data-correcta="1">
+              <p>5. ¿Qué método NO hace crecer la pila?</p>
+              <div class="opciones"><button class="btn">push</button><button class="btn">replace</button><button class="btn">navigate a otra ruta</button></div>
+              <p class="porque" hidden>replace cambia el tope por otra pantalla.</p>
+            </div>
+            <div class="pregunta" data-correcta="2">
+              <p>6. Con <code>guard={false}</code>, las pantallas de adentro…</p>
+              <div class="opciones"><button class="btn">se ven en gris</button><button class="btn">piden contraseña</button><button class="btn">no existen</button></div>
+              <p class="porque" hidden>El navegador ni siquiera las registra.</p>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Hacerlo a mano alzada: leer la pregunta, votar, y recién después tocar la opción.</p>
+        </aside>
+      </section>
+
+      <!-- 35 · Cierre -->
+      <section class="slide" data-seccion="taller" data-titulo="Resumen">
+        <div class="lamina">
+          <h2 class="titulo">Para llevarse</h2>
+          <div class="dos">
+            <ul class="estaciones">
+              <li><strong>Un archivo en <span class="ruta">src/app</span> es una ruta.</strong> Los <span class="ruta">_layout</span> deciden cómo se muestran.</li>
+              <li><strong>Stack = pila (LIFO).</strong> push apila, back desapila, replace cambia el tope.</li>
+              <li><strong>Tabs y Drawer no apilan:</strong> cambian de sección, y cada sección puede tener su pila.</li>
+              <li><strong><span class="ruta">[id]</span> captura un segmento, <span class="ruta">[...slug]</span> varios.</strong> Los params siempre son texto.</li>
+              <li><strong><span class="ruta">Stack.Protected</span></strong> hace que las pantallas existan solo cuando corresponde.</li>
+              <li><strong>Las acciones de navegación forman una cola (FIFO)</strong> y se procesan en orden.</li>
+            </ul>
+            <div class="pila-v">
+              <h3 class="subtitulo">Para seguir</h3>
+              <ul class="estaciones">
+                <li>Documentación oficial: <span class="ruta">docs.expo.dev/routing/introduction</span></li>
+                <li>Expo Go: <span class="ruta">expo.dev/go</span></li>
+                <li>El código de la app de ejemplo, con comentarios en cada archivo.</li>
+              </ul>
+              <p class="titulo" style="font-size: clamp(2.6rem, 6vw, 5rem); margin-top: 12px">¿Preguntas?</p>
+            </div>
+          </div>
+        </div>
+        <aside class="notas">
+          <p>Cerrar volviendo al mapa de la portada: ahora pueden leer cada estación y saben qué archivo hay detrás.</p>
+        </aside>
+      </section>
+    </main>
+
+    <!-- Barra inferior: mapa de progreso + controles -->
+    <nav class="barra" aria-label="Navegación de la presentación">
+      <span class="barra-curso">React Native II · IPF</span>
+      <div class="mapa" id="mapa"></div>
+      <span class="contador" id="contador">1 / 35</span>
+      <div class="controles">
+        <button class="control" id="btn-anterior" aria-label="Diapositiva anterior" title="Anterior (←)">
+          <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
+        </button>
+        <button class="control" id="btn-siguiente" aria-label="Diapositiva siguiente" title="Siguiente (→)">
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
+        </button>
+        <button class="control" id="btn-mapa" aria-label="Mapa completo" title="Mapa completo (M)" aria-pressed="false">
+          <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2" /><circle cx="18" cy="18" r="2" /><path d="M8 6h5a3 3 0 0 1 3 3v7" /></svg>
+        </button>
+        <button class="control solo-escritorio" id="btn-notas" aria-label="Notas del docente" title="Notas (N)" aria-pressed="false">
+          <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z" /><path d="M9 9h6M9 13h6" /></svg>
+        </button>
+        <button class="control" id="btn-tema" aria-label="Cambiar tema claro u oscuro" title="Tema (T)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor" /></svg>
+        </button>
+        <button class="control solo-escritorio" id="btn-completa" aria-label="Pantalla completa" title="Pantalla completa (F)">
+          <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>
+        </button>
+      </div>
+    </nav>
+
+    <aside class="panel-notas" id="panel-notas" hidden>
+      <span class="etiqueta">Notas del docente</span>
+      <div id="contenido-notas"></div>
+    </aside>
+
+    <div class="vista-general" id="vista-general" hidden>
+      <h2>Mapa completo</h2>
+      <div class="vg-lineas" id="vg-lineas"></div>
+    </div>
+
+    <script src="js/resaltador.js"></script>
+    <script src="js/demos.js"></script>
+    <script src="js/presentacion.js"></script>
+  </body>
+</html>
